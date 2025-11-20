@@ -1,4 +1,12 @@
 sdsl-lite/
 FM
+SA
+
+sources
+GCF_000001405.40_GRCh38.p14_genomic.fna
+dna
+proteins
 
 *.sdsl
+
+
