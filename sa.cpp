@@ -1,4 +1,4 @@
-// Construcción del suffix array y la BWT de un texto
+// Construcción del suffix array de un texto con búsqueda binaria
 //
 // Prerrequisitos: Tener la biblioteca SDSL instalada
 //
@@ -107,32 +107,21 @@ int main(int argc, char** argv) {
         seq[n-1] = 0; // Representa el final de texto. Suele representarse por el símbolo $
     }
 
-    cout << "Construyendo el Suffix array ..." << endl;
+    cout << "Construyendo el Suffix Array ..." << endl;
 
     Temporizador timer;
     int_vector<> sa(1, 0, bits::hi(n)+1);
     sa.resize(n);
     algorithm::calculate_sa((const unsigned char*)seq.data(), n, sa);
 
-    cout << "Construyendo la BWT ..." << endl;
-    int_vector<> bwt(1, 0, 8);
-    bwt.resize(n);
-
-    int32_t to_add[2] = {(int32_t)-1, n-1};
-    for (int32_t i=0; i < n; ++i)
-        bwt[i] = seq[sa[i] + to_add[sa[i]==0]];
-
     long t_construccion = timer.transcurrido_ms();
 
     double tamano_original_mb = obtener_tamano_archivo_mb(archivo_entrada);
     double tamano_sa_mb = size_in_mega_bytes(sa);
-    double tamano_bwt_mb = size_in_mega_bytes(bwt);
-    double tamano_total_mb = tamano_sa_mb + tamano_bwt_mb;
+    double tamano_total_mb = tamano_sa_mb;
 
     cout << "Tamaño del archivo original: " << tamano_original_mb << " MB." << endl;
     cout << "Tamaño del SA: " << tamano_sa_mb << " MB." << endl;
-    cout << "Tamaño de la BWT: " << tamano_bwt_mb << " MB." << endl;
-    cout << "Tamaño total (SA + BWT): " << tamano_total_mb << " MB." << endl;
     cout << "Tiempo empleado en la construcción: " << t_construccion << " ms" << endl;
 
     // Registrar construcción en CSV

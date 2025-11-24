@@ -94,12 +94,12 @@ El script genera 6 archivos CSV con los resultados:
 ### Construcción
 - `exp-FM-construccion.csv` - Métricas de construcción del FM-Index
 - `exp-SA-construccion.csv` - Métricas de construcción del Suffix Array
-- `exp-SA-LCP-construccion.csv` - Métricas de construcción del SA+LCP
+- `exp-SA-LCP-construccion.csv` - Métricas de construcción del SA + LCP
 
 ### Búsquedas
 - `exp-FM-busquedas.csv` - Métricas de búsqueda con FM-Index
 - `exp-SA-busquedas.csv` - Métricas de búsqueda con Suffix Array
-- `exp-SA-LCP-busquedas.csv` - Métricas de búsqueda con SA+LCP
+- `exp-SA-LCP-busquedas.csv` - Métricas de búsqueda con SA + LCP
 
 ## Personalización
 
