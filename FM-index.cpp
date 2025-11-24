@@ -2,69 +2,40 @@
 #include <string>
 #include <iostream>
 #include <algorithm>
-#include <chrono>
-#include <fstream>   // <-- para los CSV
 #include <vector>
+#include "utils.hpp"
 
 using namespace sdsl;
 using namespace std;
-using namespace std::chrono;
 
 int main(int argc, char** argv) {
-    if (argc != 2) {
-        cout << "Uso: " << argv[0] << " <archivo entrada>" << endl;
-        return 1;
-    }
-
-    string archivo_entrada = argv[1];
+    string archivo_entrada = validar_archivo_entrada(argc, argv);
 
     cout << "Construyendo el FM-index ..." << endl;
     csa_wt<wt_int<>> fm_index;
 
-    auto inicio = high_resolution_clock::now();
+    Temporizador timer;
     construct(fm_index, archivo_entrada, 1);
-    auto fin = high_resolution_clock::now();
+    long t_construccion = timer.transcurrido_ms();
 
-    auto t_construccion = duration_cast<milliseconds>(fin - inicio).count();
-    double tamano_mb = size_in_mega_bytes(fm_index);
+    double tamano_original_mb = obtener_tamano_archivo_mb(archivo_entrada);
+    double tamano_estructura_mb = size_in_mega_bytes(fm_index);
 
-    cout << "Tamaño del FM-index: " << tamano_mb << " MB." << endl;
+    cout << "Tamaño del archivo original: " << tamano_original_mb << " MB." << endl;
+    cout << "Tamaño del FM-index: " << tamano_estructura_mb << " MB." << endl;
     cout << "Tiempo empleado en la construcción: " << t_construccion << " ms" << endl;
 
-    // =============================
-    //  LOG: exp-FM-creacion.csv
-    //  columnas: archivo,tiempo_ms,tamano_mb
-    // =============================
-    {
-        ofstream out("exp-FM-creacion.csv", ios::app);
-        if (!out) {
-            cerr << "Advertencia: no se pudo abrir exp-FM-creacion.csv para escribir." << endl;
-        } else {
-            // Si el archivo está vacío, escribimos cabecera
-            if (out.tellp() == 0) {
-                out << "archivo,tiempo_ms,tamano_mb\n";
-            }
-            out << archivo_entrada << ","
-                << t_construccion << ","
-                << tamano_mb << "\n";
-        }
-    }
+    // Registrar construcción en CSV
+    escribir_csv_construccion("exp-FM-construccion.csv",
+                              archivo_entrada,
+                              tamano_original_mb,
+                              t_construccion,
+                              tamano_estructura_mb);
 
     // =============================
     //  BÚSQUEDAS INTERACTIVAS
     //  se repiten hasta que el patrón sea "exit"
     // =============================
-
-    // Abrimos (una vez) el archivo de log de búsquedas
-    // columnas: archivo,patron,tiempo_ms,ocurrencias
-    ofstream out_busq("exp-FM-busquedas.csv", ios::app);
-    if (!out_busq) {
-        cerr << "Advertencia: no se pudo abrir exp-FM-busquedas.csv para escribir." << endl;
-    } else {
-        if (out_busq.tellp() == 0) {
-            out_busq << "archivo,patron,tiempo_ms,ocurrencias\n";
-        }
-    }
 
     while (true) {
         string patron;
@@ -79,10 +50,9 @@ int main(int argc, char** argv) {
         }
 
         // Búsqueda
-        inicio = high_resolution_clock::now();
+        timer.reiniciar();
         size_t occs = sdsl::count(fm_index, patron.begin(), patron.end());
-        fin = high_resolution_clock::now();
-        auto t_busqueda = duration_cast<milliseconds>(fin - inicio).count();
+        long t_busqueda = timer.transcurrido_ms();
 
         cout << "# de ocurrencias: " << occs << endl;
         cout << "Tiempo de búsqueda: " << t_busqueda << " ms" << endl;
@@ -100,13 +70,13 @@ int main(int argc, char** argv) {
             cout << "\n";
         }
 
-        // Escribimos al CSV de búsquedas
-        if (out_busq) {
-            out_busq << archivo_entrada << ","
-                     << patron << ","
-                     << t_busqueda << ","
-                     << occs << "\n";
-        }
+        // Registrar búsqueda en CSV
+        escribir_csv_busqueda("exp-FM-busquedas.csv",
+                             archivo_entrada,
+                             patron,
+                             patron.size(),
+                             t_busqueda,
+                             occs);
     }
 
     return 0;

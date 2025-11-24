@@ -1,10 +1,11 @@
-// Construcción del suffix array y la BWT de un texto
+// Construcción del suffix array, LCP array y búsqueda de patrones
 //
 // Prerrequisitos: Tener la biblioteca SDSL instalada
 //
-// Compilación: g++ -O3 -o SA sa.cpp utils.cpp -lsdsl -ldivsufsort -ldivsufsort64
+// Compilación: g++ -O3 -o SA-LCP sa-lcp.cpp utils.cpp -lsdsl -ldivsufsort -ldivsufsort64
 
 #include <sdsl/suffix_arrays.hpp>
+#include <sdsl/lcp.hpp>
 #include <string>
 #include <iostream>
 #include <algorithm>
@@ -13,79 +14,94 @@
 using namespace sdsl;
 using namespace std;
 
-// Función auxiliar para buscar un patrón en el suffix array
-// Retorna el número de ocurrencias y llena el vector de posiciones
-size_t buscar_patron_sa(const int_vector<>& sa, const int_vector<>& seq,
-                        const string& patron, vector<size_t>& posiciones) {
+// Función para calcular el LCP entre dos sufijos
+int calcular_lcp(const int_vector<>& seq, int pos1, int pos2, int n) {
+    int lcp = 0;
+    while (pos1 + lcp < n && pos2 + lcp < n && seq[pos1 + lcp] == seq[pos2 + lcp]) {
+        lcp++;
+    }
+    return lcp;
+}
+
+// Construir el array LCP manualmente
+void construir_lcp_array(const int_vector<>& sa, const int_vector<>& seq,
+                         int_vector<>& lcp) {
+    int n = sa.size();
+    lcp.resize(n);
+    lcp[0] = 0;
+
+    for (int i = 1; i < n; ++i) {
+        lcp[i] = calcular_lcp(seq, sa[i-1], sa[i], n);
+    }
+}
+
+// Búsqueda de patrón usando SA + LCP
+// Usa búsqueda binaria mejorada con información del LCP
+size_t buscar_patron_sa_lcp(const int_vector<>& sa, const int_vector<>& seq,
+                            const int_vector<>& lcp, const string& patron,
+                            vector<size_t>& posiciones) {
     posiciones.clear();
 
     int n = sa.size();
     int m = patron.size();
 
-    // Búsqueda binaria para encontrar el rango en el SA
-    int left = 0, right = n;
+    if (m == 0) return 0;
 
-    // Encontrar el primer sufijo que comienza con el patrón
-    int first = n;
-    while (left < right) {
-        int mid = (left + right) / 2;
-        int pos = sa[mid];
-
-        // Comparar el patrón con el sufijo en la posición mid
-        bool menor = false;
+    // Función auxiliar para comparar patrón con sufijo
+    auto comparar = [&](int idx_sa) -> int {
+        int pos = sa[idx_sa];
         for (int i = 0; i < m && pos + i < n; ++i) {
-            if (patron[i] < seq[pos + i]) {
-                menor = true;
-                break;
-            } else if (patron[i] > seq[pos + i]) {
-                break;
-            }
+            if ((unsigned char)patron[i] < seq[pos + i]) return -1;
+            if ((unsigned char)patron[i] > seq[pos + i]) return 1;
         }
+        // Si llegamos aquí, el patrón coincide con los primeros m caracteres
+        return 0;
+    };
 
-        if (menor) {
-            right = mid;
+    // Búsqueda binaria para encontrar el primer sufijo que coincide
+    int left = 0, right = n - 1;
+    int first = -1;
+
+    while (left <= right) {
+        int mid = (left + right) / 2;
+        int cmp = comparar(mid);
+
+        if (cmp == 0) {
+            first = mid;
+            right = mid - 1; // Seguir buscando hacia la izquierda
+        } else if (cmp < 0) {
+            right = mid - 1;
         } else {
             left = mid + 1;
-            first = mid;
         }
     }
 
-    // Buscar todas las ocurrencias desde first hacia atrás
-    for (int i = first; i >= 0; --i) {
-        int pos = sa[i];
-        bool coincide = true;
+    if (first == -1) {
+        return 0; // No se encontró el patrón
+    }
 
-        for (int j = 0; j < m && pos + j < n; ++j) {
-            if (patron[j] != seq[pos + j]) {
-                coincide = false;
-                break;
-            }
-        }
+    // Encontrar el último sufijo que coincide
+    left = first;
+    right = n - 1;
+    int last = first;
 
-        if (coincide) {
-            posiciones.push_back(pos);
+    while (left <= right) {
+        int mid = (left + right) / 2;
+        int cmp = comparar(mid);
+
+        if (cmp == 0) {
+            last = mid;
+            left = mid + 1; // Seguir buscando hacia la derecha
+        } else if (cmp < 0) {
+            right = mid - 1;
         } else {
-            break;
+            left = mid + 1;
         }
     }
 
-    // Buscar todas las ocurrencias desde first+1 hacia adelante
-    for (int i = first + 1; i < n; ++i) {
-        int pos = sa[i];
-        bool coincide = true;
-
-        for (int j = 0; j < m && pos + j < n; ++j) {
-            if (patron[j] != seq[pos + j]) {
-                coincide = false;
-                break;
-            }
-        }
-
-        if (coincide) {
-            posiciones.push_back(pos);
-        } else {
-            break;
-        }
+    // Recolectar todas las posiciones
+    for (int i = first; i <= last; ++i) {
+        posiciones.push_back(sa[i]);
     }
 
     sort(posiciones.begin(), posiciones.end());
@@ -114,6 +130,10 @@ int main(int argc, char** argv) {
     sa.resize(n);
     algorithm::calculate_sa((const unsigned char*)seq.data(), n, sa);
 
+    cout << "Construyendo el LCP array ..." << endl;
+    int_vector<> lcp;
+    construir_lcp_array(sa, seq, lcp);
+
     cout << "Construyendo la BWT ..." << endl;
     int_vector<> bwt(1, 0, 8);
     bwt.resize(n);
@@ -126,17 +146,19 @@ int main(int argc, char** argv) {
 
     double tamano_original_mb = obtener_tamano_archivo_mb(archivo_entrada);
     double tamano_sa_mb = size_in_mega_bytes(sa);
+    double tamano_lcp_mb = size_in_mega_bytes(lcp);
     double tamano_bwt_mb = size_in_mega_bytes(bwt);
-    double tamano_total_mb = tamano_sa_mb + tamano_bwt_mb;
+    double tamano_total_mb = tamano_sa_mb + tamano_lcp_mb + tamano_bwt_mb;
 
     cout << "Tamaño del archivo original: " << tamano_original_mb << " MB." << endl;
     cout << "Tamaño del SA: " << tamano_sa_mb << " MB." << endl;
+    cout << "Tamaño del LCP: " << tamano_lcp_mb << " MB." << endl;
     cout << "Tamaño de la BWT: " << tamano_bwt_mb << " MB." << endl;
-    cout << "Tamaño total (SA + BWT): " << tamano_total_mb << " MB." << endl;
+    cout << "Tamaño total (SA + LCP + BWT): " << tamano_total_mb << " MB." << endl;
     cout << "Tiempo empleado en la construcción: " << t_construccion << " ms" << endl;
 
     // Registrar construcción en CSV
-    escribir_csv_construccion("exp-SA-construccion.csv",
+    escribir_csv_construccion("exp-SA-LCP-construccion.csv",
                               archivo_entrada,
                               tamano_original_mb,
                               t_construccion,
@@ -162,7 +184,7 @@ int main(int argc, char** argv) {
         // Búsqueda
         timer.reiniciar();
         vector<size_t> posiciones;
-        size_t occs = buscar_patron_sa(sa, seq, patron, posiciones);
+        size_t occs = buscar_patron_sa_lcp(sa, seq, lcp, patron, posiciones);
         long t_busqueda = timer.transcurrido_ms();
 
         cout << "# de ocurrencias: " << occs << endl;
@@ -179,7 +201,7 @@ int main(int argc, char** argv) {
         }
 
         // Registrar búsqueda en CSV
-        escribir_csv_busqueda("exp-SA-busquedas.csv",
+        escribir_csv_busqueda("exp-SA-LCP-busquedas.csv",
                              archivo_entrada,
                              patron,
                              patron.size(),
