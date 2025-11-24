@@ -109,15 +109,6 @@ El LCP array permite optimizar las búsquedas al evitar comparaciones redundante
 ---
 
 ## Compilación y Ejecución
-
-### Prerrequisitos
-
-Instalar SDSL-lite:
-```bash
-cd sdsl-lite/
-./install.sh
-```
-
 ### Compilación
 
 ```bash
