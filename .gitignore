@@ -5,7 +5,7 @@ SA-LCP
 utils.o
 
 sources
-GCF_000001405.40_GRCh38.p14_genomic.fna
+genomic.fna
 dna
 proteins
 
