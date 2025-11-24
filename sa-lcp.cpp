@@ -14,24 +14,30 @@
 using namespace sdsl;
 using namespace std;
 
-// Función para calcular el LCP entre dos sufijos
-int calcular_lcp(const int_vector<>& seq, int pos1, int pos2, int n) {
-    int lcp = 0;
-    while (pos1 + lcp < n && pos2 + lcp < n && seq[pos1 + lcp] == seq[pos2 + lcp]) {
-        lcp++;
-    }
-    return lcp;
-}
-
-// Construir el array LCP manualmente
-void construir_lcp_array(const int_vector<>& sa, const int_vector<>& seq,
-                         int_vector<>& lcp) {
+// Algoritmo de Kasai para construir LCP en O(n)
+// Referencia: Kasai et al. (2001) "Linear-Time Longest-Common-Prefix Computation
+// in Suffix Arrays and Its Applications"
+void construir_lcp_kasai(int_vector<>& lcp, const int_vector<>& sa, const int_vector<>& seq) {
     int n = sa.size();
     lcp.resize(n);
     lcp[0] = 0;
 
-    for (int i = 1; i < n; ++i) {
-        lcp[i] = calcular_lcp(seq, sa[i-1], sa[i], n);
+    // Construir el array inverso del SA (rank)
+    int_vector<> rank(n);
+    for (int i = 0; i < n; ++i) {
+        rank[sa[i]] = i;
+    }
+
+    int h = 0;
+    for (int i = 0; i < n; ++i) {
+        if (rank[i] > 0) {
+            int j = sa[rank[i] - 1];
+            while (i + h < n && j + h < n && seq[i + h] == seq[j + h]) {
+                h++;
+            }
+            lcp[rank[i]] = h;
+            if (h > 0) h--;
+        }
     }
 }
 
@@ -130,9 +136,9 @@ int main(int argc, char** argv) {
     sa.resize(n);
     algorithm::calculate_sa((const unsigned char*)seq.data(), n, sa);
 
-    cout << "Construyendo el LCP array ..." << endl;
+    cout << "Construyendo el LCP array (algoritmo de Kasai O(n)) ..." << endl;
     int_vector<> lcp;
-    construir_lcp_array(sa, seq, lcp);
+    construir_lcp_kasai(lcp, sa, seq);
 
     cout << "Construyendo la BWT ..." << endl;
     int_vector<> bwt(1, 0, 8);
