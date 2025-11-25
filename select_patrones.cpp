@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::ofstream archivoSalida(nombreArchivoSalida, std::ios::app);
+    std::ofstream archivoSalida(nombreArchivoSalida, std::ios::app | std::ios::binary);
     if (!archivoSalida.is_open()) {
         std::cerr << "Error: No se pudo crear el archivo de salida '" << nombreArchivoSalida << "'" << std::endl;
         return 1;
