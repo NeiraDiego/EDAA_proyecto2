@@ -16,8 +16,21 @@ La búsqueda en FM-Index utiliza el concepto de _backward search_ sobre la BWT, 
 - **Localización (locate):** O(occ × s) donde occ es el número de ocurrencias y s es la densidad de muestreo del SA
 
 **Complejidad Espacial:**
-- **Índice:** Entre 0.5x y 2x el tamaño del texto original (típicamente ~1x para DNA)
+- **Índice final:** Entre 0.5x y 2x el tamaño del texto original (típicamente ~1x para DNA)
+- **Durante construcción:** 2-3x el tamaño del texto (requiere estructuras auxiliares temporales)
 - La compresión efectiva depende de la entropía del texto y el tipo de wavelet tree usado
+
+**Requerimientos de Memoria Durante Construcción:**
+
+Durante la ejecución de `construct(fm_index, archivo_entrada, 1)`, SDSL realiza internamente estos pasos que requieren espacio adicional en RAM:
+
+1. **Lectura del texto** → ~1x tamaño
+2. **Construcción temporal del Suffix Array** → ~4x tamaño (usando libdivsufsort)
+3. **Cálculo de la transformada de Burrows-Wheeler (BWT)** → ~1x tamaño
+4. **Construcción del Wavelet Tree** sobre el BWT
+5. **Liberación de estructuras temporales** (SA y BWT sin comprimir)
+
+El **pico de memoria** ocurre durante la construcción del SA temporal, pero gracias a técnicas de construcción semi-externa de SDSL, el requerimiento total se mantiene en **2-3x el tamaño del archivo de entrada**, significativamente más eficiente que construir un SA completo sin comprimir (5-10x).
 
 ---
 
@@ -72,7 +85,8 @@ El LCP array permite optimizar las búsquedas al evitar comparaciones redundante
 |----------------|----------|----------|----------------|
 | **Construcción (Tiempo)** | O(n) | O(n) | O(n) SA + O(n) LCP |
 | **Búsqueda (Tiempo)** | O(m) count<br>O(occ × s) locate | O(m log n + occ) | O(m log n + occ)<br>O(m + log n + occ)* |
-| **Espacio en Memoria** | 0.5x - 2x texto<br>(~1x típico) | ~4x texto | ~8x texto |
+| **RAM Durante Construcción** | **2-3x** texto 🟢 | **5-10x** texto 🟠 | **5-10x** texto 🔴 |
+| **Espacio Estructura Final** | 0.5x - 2x texto<br>(~1x típico) 🟢 | ~4x texto 🟠 | ~8x texto 🔴 |
 | **Compresión** | ✅ Sí (CSA + WT) | ❌ No (SA sin comprimir) | ❌ No (SA + LCP sin comprimir) |
 | **Velocidad de Búsqueda** | Rápida<br>(proporcional a m) | Muy rápida<br>(acceso directo a SA) | Muy rápida<br>(potencial de optimización) |
 | **Uso de Memoria** | **Bajo** 🟢 | **Alto** 🔴 | **Muy Alto** 🔴 |
