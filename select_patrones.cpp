@@ -65,8 +65,8 @@ int main(int argc, char* argv[]) {
     // 3. Lógica principal (Carga y búsqueda)
     std::cout << "[INFO] Leyendo archivo: " << nombreArchivoEntrada << "..." << std::endl;
     std::string texto = leerArchivo(nombreArchivoEntrada);
-    std::cout << "[INFO] Leído archivo de " << n << "caracteres." << std::endl;
     long n = texto.length();
+    std::cout << "[INFO] Leído archivo de " << n << "caracteres." << std::endl;
 
     if (n < m) {
         std::cerr << "Error: El archivo es mas corto que el largo del patron (m)." << std::endl;
