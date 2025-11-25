@@ -12,7 +12,7 @@ void mostrarUso(const char* nombrePrograma) {
     std::cerr << "Ejemplo: " << nombrePrograma << " libro.txt resultados.txt 100 5" << std::endl;
 }
 
-std::string leerArchivo(const std::string& nombreArchivo) {
+std::string leerArchivo(const std::string& nombreArchivo, std::ios::binary) {
   std::string file_path = "/home/dataset/"+nombreArchivo;
     std::ifstream archivo(file_path);
     if (!archivo.is_open()) {
