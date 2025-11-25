@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i < occ; ++i) {
         long indiceAleatorio = dist(rng);
         std::string patron = texto.substr(indiceAleatorio, m);
-        int totalOcurrencias = contarOcurrencias(texto, patron);
+        //int totalOcurrencias = contarOcurrencias(texto, patron);
         
         // Escribir al archivo
         //archivoSalida << patron << " ; " << totalOcurrencias << "\n";
