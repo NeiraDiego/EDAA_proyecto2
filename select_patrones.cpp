@@ -72,16 +72,11 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::ofstream archivoSalida(nombreArchivoSalida);
+    std::ofstream archivoSalida(nombreArchivoSalida, std::ios::app);
     if (!archivoSalida.is_open()) {
         std::cerr << "Error: No se pudo crear el archivo de salida '" << nombreArchivoSalida << "'" << std::endl;
         return 1;
     }
-
-    // Cabecera del archivo
-    archivoSalida << "Resultados de busqueda aleatoria\n";
-    archivoSalida << "Archivo: " << nombreArchivoEntrada << " | Patrones: " << occ << " | Largo: " << m << "\n";
-    archivoSalida << "---------------------------------------\n";
 
     // Configuración aleatoria
     std::mt19937 rng(std::time(nullptr));
