@@ -8,9 +8,10 @@
 
 // Función para leer el archivo completo en un string
 std::string leerArchivo(const std::string& nombreArchivo) {
-    std::ifstream archivo(nombreArchivo);
+  std::string file_path = "/home/dataset/"+nombreArchivo;
+    std::ifstream archivo(file_path);
     if (!archivo.is_open()) {
-        std::cerr << "Error: No se pudo abrir el archivo " << nombreArchivo << std::endl;
+        std::cerr << "Error: No se pudo abrir el archivo " << file_path << std::endl;
         exit(EXIT_FAILURE);
     }
     
