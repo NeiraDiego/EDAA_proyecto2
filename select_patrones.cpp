@@ -5,6 +5,23 @@
 #include <sstream>
 #include <random>
 #include <ctime>
+#include <sstream>
+
+std::string sanitizarPatron(const std::string& entrada) {
+    std::stringstream ss;
+    for (char c : entrada) {
+        if (c == '\n') {
+            ss << "\\n"; // Reemplaza salto de linea por los caracteres \ y n
+        } else if (c == '\r') {
+            ss << "\\r"; // Importante si trabajas con archivos de Windows
+        } else if (c == '\t') {
+            ss << "\\t"; // Opcional: para tabulaciones
+        } else {
+            ss << c;
+        }
+    }
+    return ss.str();
+}
 
 // Imprime ayuda si los argumentos no son correctos
 void mostrarUso(const char* nombrePrograma) {
@@ -14,7 +31,7 @@ void mostrarUso(const char* nombrePrograma) {
 
 std::string leerArchivo(const std::string& nombreArchivo) {
   std::string file_path = "/home/dataset/"+nombreArchivo;
-    std::ifstream archivo(file_path, std::ios::binary);
+    std::ifstream archivo(file_path);
     if (!archivo.is_open()) {
         std::cerr << "Error: No se pudo abrir el archivo de entrada '" << file_path << "'" << std::endl;
         exit(EXIT_FAILURE);
@@ -73,7 +90,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::ofstream archivoSalida(nombreArchivoSalida, std::ios::app | std::ios::binary);
+    std::ofstream archivoSalida(nombreArchivoSalida, std::ios::app);
     if (!archivoSalida.is_open()) {
         std::cerr << "Error: No se pudo crear el archivo de salida '" << nombreArchivoSalida << "'" << std::endl;
         return 1;
@@ -87,7 +104,7 @@ int main(int argc, char* argv[]) {
 
     for (int i = 0; i < occ; ++i) {
         long indiceAleatorio = dist(rng);
-        std::string patron = texto.substr(indiceAleatorio, m);
+        std::string patron = sanitizarPatron(texto.substr(indiceAleatorio, m));
         //int totalOcurrencias = contarOcurrencias(texto, patron);
         
         // Escribir al archivo
