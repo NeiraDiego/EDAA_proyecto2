@@ -21,10 +21,12 @@ PATRONES=(
 # Programas a ejecutar
 PROGRAMAS=("./FM" "./SA" "./SA-LCP")
 
-# Número de veces que se construye la estructura
+# Número de veces que se construye la estructura por programa/archivo
 NUM_CONSTRUCCIONES=5
 
-# Número de veces que se busca cada patrón
+# Número de veces que se busca cada patrón (usando parámetro de repeticiones)
+# En la última construcción, se ejecuta: ./PROGRAMA archivo patrones NUM_BUSQUEDAS_POR_PATRON
+# Esto construye el índice 1 vez y ejecuta múltiples búsquedas sin reconstruir
 NUM_BUSQUEDAS_POR_PATRON=30
 
 # ==============================================================================
@@ -86,6 +88,7 @@ ejecutar_solo_construccion() {
 }
 
 # Función para ejecutar construcción + búsquedas múltiples
+# NOTA: Ahora usa el parámetro de repeticiones integrado en los programas
 ejecutar_con_busquedas() {
     local programa=$1
     local archivo=$2
@@ -98,21 +101,9 @@ ejecutar_con_busquedas() {
         return
     fi
 
-    # Leer todos los patrones del archivo
-    mapfile -t patrones < "$archivo_patrones"
-
-    # Crear entrada para el programa: cada patrón 30 veces, luego "exit"
-    {
-        for patron in "${patrones[@]}"; do
-            # Ignorar líneas vacías
-            if [ -n "$patron" ]; then
-                for ((busqueda=1; busqueda<=NUM_BUSQUEDAS_POR_PATRON; busqueda++)); do
-                    echo "$patron"
-                done
-            fi
-        done
-        echo "exit"
-    } | $programa "$archivo" > /dev/null
+    # Usar el nuevo parámetro de repeticiones
+    # Esto construye el índice 1 vez y ejecuta NUM_BUSQUEDAS_POR_PATRON búsquedas por cada patrón
+    $programa "$archivo" "$archivo_patrones" "$NUM_BUSQUEDAS_POR_PATRON" > /dev/null
 }
 
 # ==============================================================================

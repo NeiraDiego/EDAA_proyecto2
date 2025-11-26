@@ -76,7 +76,6 @@ void escribir_csv_construccion(const string& nombre_csv,
 
 void escribir_csv_busqueda(const string& nombre_csv,
                            const string& archivo_entrada,
-                           const string& patron,
                            size_t tamano_patron,
                            long long tiempo_busqueda_ns,
                            size_t ocurrencias) {
@@ -88,11 +87,10 @@ void escribir_csv_busqueda(const string& nombre_csv,
 
     // Escribir encabezado si el archivo está vacío
     if (out.tellp() == 0) {
-        out << "archivo_original,patron,tamano_patron,tiempo_busqueda_ns,ocurrencias\n";
+        out << "archivo_original,tamano_patron,tiempo_busqueda_ns,ocurrencias\n";
     }
 
     out << archivo_entrada << ","
-        << patron << ","
         << tamano_patron << ","
         << tiempo_busqueda_ns << ","
         << ocurrencias << "\n";

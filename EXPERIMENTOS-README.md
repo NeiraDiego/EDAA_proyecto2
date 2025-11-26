@@ -98,20 +98,33 @@ En este modo, el programa solicita patrones por entrada estándar hasta que se i
 
 **Modo batch (con archivo de patrones):**
 ```bash
-./FM <archivo_entrada> <archivo_patrones>
-./SA <archivo_entrada> <archivo_patrones>
-./SA-LCP <archivo_entrada> <archivo_patrones>
+./FM <archivo_entrada> <archivo_patrones> [repeticiones]
+./SA <archivo_entrada> <archivo_patrones> [repeticiones]
+./SA-LCP <archivo_entrada> <archivo_patrones> [repeticiones]
 ```
 En este modo, el programa lee todos los patrones desde el archivo y ejecuta las búsquedas automáticamente sin output verboso.
 
-**Ejemplo:**
-```bash
-# Construir índice y buscar patrones desde archivo
-./FM dna patrones-dna
+**Parámetro de repeticiones:**
+- Especifica cuántas veces se ejecuta cada búsqueda
+- El índice se construye **una sola vez** y se reutiliza para todas las repeticiones
+- Default: 1 (sin repeticiones)
+- Útil para experimentos estadísticos con múltiples mediciones
 
+**Ejemplos:**
+```bash
 # Modo interactivo
 ./FM dna
 # Luego ingresar patrones manualmente...
+
+# Construir índice y buscar cada patrón 1 vez
+./FM dna patrones-dna
+
+# Construir índice y buscar cada patrón 30 veces
+# Ventaja: evita reconstruir el índice 30 veces
+./FM dna patrones-dna 30
+
+# Si patrones-dna tiene 100 patrones, esto genera 3000 búsquedas
+# Mucho más eficiente que ejecutar: for i in {1..30}; do ./FM dna patrones-dna; done
 ```
 
 ### Ejecución básica del script de experimentos
@@ -170,6 +183,19 @@ El script genera 6 archivos CSV con los resultados:
 - `exp-FM-busquedas.csv` - Métricas de búsqueda con FM-Index
 - `exp-SA-busquedas.csv` - Métricas de búsqueda con Suffix Array
 - `exp-SA-LCP-busquedas.csv` - Métricas de búsqueda con SA + LCP
+
+**Formato:**
+```csv
+archivo_original,tamano_patron,tiempo_busqueda_ns,ocurrencias
+dna,100,15234,42
+dna,100,14987,42
+dna,1000,89321,3
+```
+
+**Notas:**
+- Tiempos en **nanosegundos** (ns) para alta precisión
+- El contenido del patrón no se guarda (solo su tamaño) para reducir tamaño de archivos
+- Cada repetición genera una línea independiente
 
 ## Personalización
 

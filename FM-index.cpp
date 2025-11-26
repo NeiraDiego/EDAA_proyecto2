@@ -9,17 +9,24 @@ using namespace sdsl;
 using namespace std;
 
 int main(int argc, char** argv) {
-    if (argc < 2 || argc > 3) {
-        cout << "Uso: " << argv[0] << " <archivo_entrada> [archivo_patrones]" << endl;
+    if (argc < 2 || argc > 4) {
+        cout << "Uso: " << argv[0] << " <archivo_entrada> [archivo_patrones] [repeticiones]" << endl;
         cout << "  archivo_entrada: archivo de texto para indexar" << endl;
         cout << "  archivo_patrones: (opcional) archivo con patrones para buscar" << endl;
-        cout << "                    Si no se especifica, se usa modo interactivo" << endl;
+        cout << "  repeticiones: (opcional) número de veces que se ejecuta cada búsqueda (default: 1)" << endl;
+        cout << "                Si no se especifica archivo_patrones, se usa modo interactivo" << endl;
         return 1;
     }
 
     string archivo_entrada = argv[1];
-    string archivo_patrones = (argc == 3) ? argv[2] : "";
+    string archivo_patrones = (argc >= 3) ? argv[2] : "";
+    int num_repeticiones = (argc == 4) ? atoi(argv[3]) : 1;
     bool modo_archivo = !archivo_patrones.empty();
+
+    if (num_repeticiones < 1) {
+        cerr << "Error: el número de repeticiones debe ser al menos 1" << endl;
+        return 1;
+    }
 
     cout << "Construyendo el FM-index ..." << endl;
     csa_wt<wt_int<>> fm_index;
@@ -53,6 +60,7 @@ int main(int argc, char** argv) {
         cout << "Leyendo patrones desde: " << archivo_patrones << endl;
         patrones = leer_patrones_desde_archivo(archivo_patrones);
         cout << "Patrones leídos: " << patrones.size() << endl;
+        cout << "Repeticiones por patrón: " << num_repeticiones << endl;
     } else {
         // Modo interactivo: leer patrones desde entrada estándar
         cout << "Modo interactivo: ingrese patrones (escriba 'exit' para terminar)" << endl;
@@ -74,41 +82,45 @@ int main(int argc, char** argv) {
     for (size_t i = 0; i < patrones.size(); ++i) {
         const string& patron = patrones[i];
 
-        // Búsqueda
-        timer.reiniciar();
-        size_t occs = sdsl::count(fm_index, patron.begin(), patron.end());
-        long long t_busqueda = timer.transcurrido_ns();
+        // Repetir la búsqueda num_repeticiones veces
+        for (int rep = 0; rep < num_repeticiones; ++rep) {
+            // Búsqueda
+            timer.reiniciar();
+            size_t occs = sdsl::count(fm_index, patron.begin(), patron.end());
+            long long t_busqueda = timer.transcurrido_ns();
 
-        if (!modo_archivo) {
-            cout << "Patrón #" << (i + 1) << ": " << patron << endl;
-            cout << "# de ocurrencias: " << occs << endl;
-            cout << "Tiempo de búsqueda: " << t_busqueda << " ns" << endl;
+            if (!modo_archivo) {
+                cout << "Patrón #" << (i + 1) << " (repetición " << (rep + 1) << "): " << patron << endl;
+                cout << "# de ocurrencias: " << occs << endl;
+                cout << "Tiempo de búsqueda: " << t_busqueda << " ns" << endl;
 
-            // Si hay ocurrencias, las mostramos
-            if (occs > 0) {
-                cout << "Las ocurrencias comienzan en las siguientes posiciones: " << endl;
-                auto posiciones = sdsl::locate(fm_index, patron.begin(), patron.end());
-                sort(posiciones.begin(), posiciones.end());
+                // Si hay ocurrencias, las mostramos (solo en la primera repetición)
+                if (rep == 0 && occs > 0) {
+                    cout << "Las ocurrencias comienzan en las siguientes posiciones: " << endl;
+                    auto posiciones = sdsl::locate(fm_index, patron.begin(), patron.end());
+                    sort(posiciones.begin(), posiciones.end());
 
-                for (size_t j = 0; j < posiciones.size(); ++j) {
-                    cout << posiciones[j];
-                    if (j + 1 < posiciones.size()) cout << ",";
+                    for (size_t j = 0; j < posiciones.size(); ++j) {
+                        cout << posiciones[j];
+                        if (j + 1 < posiciones.size()) cout << ",";
+                    }
+                    cout << "\n";
                 }
-                cout << "\n";
             }
-        }
 
-        // Registrar búsqueda en CSV
-        escribir_csv_busqueda("exp-FM-busquedas.csv",
-                             archivo_entrada,
-                             patron,
-                             patron.size(),
-                             t_busqueda,
-                             occs);
+            // Registrar búsqueda en CSV
+            escribir_csv_busqueda("exp-FM-busquedas.csv",
+                                 archivo_entrada,
+                                 patron.size(),
+                                 t_busqueda,
+                                 occs);
+        }
     }
 
     if (modo_archivo) {
-        cout << "Búsquedas completadas: " << patrones.size() << " patrones procesados" << endl;
+        cout << "Búsquedas completadas: " << (patrones.size() * num_repeticiones)
+             << " búsquedas (" << patrones.size() << " patrones × "
+             << num_repeticiones << " repeticiones)" << endl;
     }
 
     return 0;

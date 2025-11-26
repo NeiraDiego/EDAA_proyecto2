@@ -139,11 +139,17 @@ En este modo, el programa solicita patrones por entrada estándar. Ingrese un pa
 
 #### Modo Batch (Archivos de Patrones)
 ```bash
-./FM <archivo_entrada> <archivo_patrones>
-./SA <archivo_entrada> <archivo_patrones>
-./SA-LCP <archivo_entrada> <archivo_patrones>
+./FM <archivo_entrada> <archivo_patrones> [repeticiones]
+./SA <archivo_entrada> <archivo_patrones> [repeticiones]
+./SA-LCP <archivo_entrada> <archivo_patrones> [repeticiones]
 ```
 En este modo, el programa lee todos los patrones desde un archivo y ejecuta las búsquedas automáticamente.
+
+**Parámetro de repeticiones (opcional):**
+- Permite ejecutar cada búsqueda múltiples veces **sin reconstruir el índice**
+- Ideal para obtener múltiples mediciones estadísticas
+- Por defecto: 1 repetición
+- Las estructuras se cargan una sola vez y se reutilizan para todas las repeticiones
 
 **Formato de archivo de patrones:**
 ```
@@ -156,16 +162,25 @@ En este modo, el programa lee todos los patrones desde un archivo y ejecuta las 
 
 Cada patrón está precedido por una línea con su longitud en bytes, seguida de exactamente esa cantidad de bytes de contenido.
 
-**Ejemplo:**
+**Ejemplos:**
 ```bash
 # Modo interactivo
 ./FM dna
 # (ingresar patrones manualmente...)
 
-# Modo batch
+# Modo batch - 1 búsqueda por patrón (por defecto)
 ./FM dna patrones-dna
 ./SA proteins patrones-proteins
 ./SA-LCP genomic.fna patrones-genomic
+
+# Modo batch - 30 repeticiones por patrón
+# Ventaja: construye el índice 1 sola vez, ejecuta 30 búsquedas por patrón
+./FM dna patrones-dna 30
+./SA proteins patrones-proteins 30
+./SA-LCP genomic.fna patrones-genomic 30
+
+# Ejemplo: 100 patrones × 30 repeticiones = 3000 búsquedas registradas
+# Esto es mucho más eficiente que ejecutar el programa 30 veces
 ```
 
 ### Archivos CSV Generados
@@ -178,11 +193,23 @@ Cada programa genera archivos CSV con métricas de rendimiento:
 - `exp-SA-LCP-construccion.csv`
 
 **Búsquedas:**
-- `exp-FM-busquedas.csv` - Archivo, patrón, tamaño, **tiempo en nanosegundos (ns)**, ocurrencias
+- `exp-FM-busquedas.csv` - Archivo, tamaño del patrón, **tiempo en nanosegundos (ns)**, ocurrencias
 - `exp-SA-busquedas.csv`
 - `exp-SA-LCP-busquedas.csv`
 
-**Nota:** Los tiempos de búsqueda se miden en **nanosegundos** para capturar con precisión operaciones muy rápidas.
+**Formato CSV de búsquedas:**
+```csv
+archivo_original,tamano_patron,tiempo_busqueda_ns,ocurrencias
+dna,100,15234,42
+dna,100,14987,42
+dna,1000,89321,3
+...
+```
+
+**Notas importantes:**
+- Los tiempos de búsqueda se miden en **nanosegundos** para capturar con precisión operaciones muy rápidas
+- El contenido del patrón **no se guarda** en el CSV (solo su tamaño) para reducir el tamaño de los archivos
+- Cada repetición genera una línea independiente en el CSV
 
 ### Herramientas Auxiliares
 
