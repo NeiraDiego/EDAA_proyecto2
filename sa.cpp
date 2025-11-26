@@ -19,25 +19,25 @@ size_t buscar_patron_sa(const int_vector<>& sa, const int_vector<>& seq,
                         const string& patron, vector<size_t>& posiciones) {
     posiciones.clear();
 
-    int n = sa.size();
-    int m = patron.size();
+    size_t n = sa.size();
+    size_t m = patron.size();
 
     // Búsqueda binaria para encontrar el rango en el SA
-    int left = 0, right = n;
+    size_t left = 0, right = n;
 
     // Encontrar el primer sufijo que comienza con el patrón
-    int first = n;
+    size_t first = n;
     while (left < right) {
-        int mid = (left + right) / 2;
-        int pos = sa[mid];
+        size_t mid = (left + right) / 2;
+        size_t pos = sa[mid];
 
         // Comparar el patrón con el sufijo en la posición mid
         bool menor = false;
-        for (int i = 0; i < m && pos + i < n; ++i) {
-            if (patron[i] < seq[pos + i]) {
+        for (size_t i = 0; i < m && pos + i < n; ++i) {
+            if ((unsigned char)patron[i] < seq[pos + i]) {
                 menor = true;
                 break;
-            } else if (patron[i] > seq[pos + i]) {
+            } else if ((unsigned char)patron[i] > seq[pos + i]) {
                 break;
             }
         }
@@ -51,12 +51,12 @@ size_t buscar_patron_sa(const int_vector<>& sa, const int_vector<>& seq,
     }
 
     // Buscar todas las ocurrencias desde first hacia atrás
-    for (int i = first; i >= 0; --i) {
-        int pos = sa[i];
+    for (size_t i = first + 1; i > 0; --i) {
+        size_t pos = sa[i - 1];
         bool coincide = true;
 
-        for (int j = 0; j < m && pos + j < n; ++j) {
-            if (patron[j] != seq[pos + j]) {
+        for (size_t j = 0; j < m && pos + j < n; ++j) {
+            if ((unsigned char)patron[j] != seq[pos + j]) {
                 coincide = false;
                 break;
             }
@@ -70,12 +70,12 @@ size_t buscar_patron_sa(const int_vector<>& sa, const int_vector<>& seq,
     }
 
     // Buscar todas las ocurrencias desde first+1 hacia adelante
-    for (int i = first + 1; i < n; ++i) {
-        int pos = sa[i];
+    for (size_t i = first + 1; i < n; ++i) {
+        size_t pos = sa[i];
         bool coincide = true;
 
-        for (int j = 0; j < m && pos + j < n; ++j) {
-            if (patron[j] != seq[pos + j]) {
+        for (size_t j = 0; j < m && pos + j < n; ++j) {
+            if ((unsigned char)patron[j] != seq[pos + j]) {
                 coincide = false;
                 break;
             }
@@ -114,7 +114,7 @@ int main(int argc, char** argv) {
 
     // Leemos el archivo de entrada y guardamos el contenido en 'seq'
     int_vector<> seq;
-    int32_t n;
+    size_t n;
     {
         load_vector_from_file(seq, archivo_entrada, 1);
         n = seq.size();

@@ -18,20 +18,20 @@ using namespace std;
 // Referencia: Kasai et al. (2001) "Linear-Time Longest-Common-Prefix Computation
 // in Suffix Arrays and Its Applications"
 void construir_lcp_kasai(int_vector<>& lcp, const int_vector<>& sa, const int_vector<>& seq) {
-    int n = sa.size();
+    size_t n = sa.size();
     lcp.resize(n);
     lcp[0] = 0;
 
     // Construir el array inverso del SA (rank)
     int_vector<> rank(n);
-    for (int i = 0; i < n; ++i) {
+    for (size_t i = 0; i < n; ++i) {
         rank[sa[i]] = i;
     }
 
-    int h = 0;
-    for (int i = 0; i < n; ++i) {
+    size_t h = 0;
+    for (size_t i = 0; i < n; ++i) {
         if (rank[i] > 0) {
-            int j = sa[rank[i] - 1];
+            size_t j = sa[rank[i] - 1];
             while (i + h < n && j + h < n && seq[i + h] == seq[j + h]) {
                 h++;
             }
@@ -48,15 +48,15 @@ size_t buscar_patron_sa_lcp(const int_vector<>& sa, const int_vector<>& seq,
                             vector<size_t>& posiciones) {
     posiciones.clear();
 
-    int n = sa.size();
-    int m = patron.size();
+    size_t n = sa.size();
+    size_t m = patron.size();
 
     if (m == 0) return 0;
 
     // Función auxiliar para comparar patrón con sufijo
-    auto comparar = [&](int idx_sa) -> int {
-        int pos = sa[idx_sa];
-        for (int i = 0; i < m && pos + i < n; ++i) {
+    auto comparar = [&](size_t idx_sa) -> int {
+        size_t pos = sa[idx_sa];
+        for (size_t i = 0; i < m && pos + i < n; ++i) {
             if ((unsigned char)patron[i] < seq[pos + i]) return -1;
             if ((unsigned char)patron[i] > seq[pos + i]) return 1;
         }
@@ -65,40 +65,43 @@ size_t buscar_patron_sa_lcp(const int_vector<>& sa, const int_vector<>& seq,
     };
 
     // Búsqueda binaria para encontrar el primer sufijo que coincide
-    int left = 0, right = n - 1;
-    int first = -1;
+    size_t left = 0, right = n - 1;
+    size_t first = n;  // Usar n como valor inválido en lugar de -1
 
     while (left <= right) {
-        int mid = (left + right) / 2;
+        size_t mid = (left + right) / 2;
         int cmp = comparar(mid);
 
         if (cmp == 0) {
             first = mid;
+            if (mid == 0) break;
             right = mid - 1; // Seguir buscando hacia la izquierda
         } else if (cmp < 0) {
+            if (mid == 0) break;
             right = mid - 1;
         } else {
             left = mid + 1;
         }
     }
 
-    if (first == -1) {
+    if (first == n) {
         return 0; // No se encontró el patrón
     }
 
     // Encontrar el último sufijo que coincide
     left = first;
     right = n - 1;
-    int last = first;
+    size_t last = first;
 
     while (left <= right) {
-        int mid = (left + right) / 2;
+        size_t mid = (left + right) / 2;
         int cmp = comparar(mid);
 
         if (cmp == 0) {
             last = mid;
             left = mid + 1; // Seguir buscando hacia la derecha
         } else if (cmp < 0) {
+            if (mid == 0) break;
             right = mid - 1;
         } else {
             left = mid + 1;
@@ -106,7 +109,7 @@ size_t buscar_patron_sa_lcp(const int_vector<>& sa, const int_vector<>& seq,
     }
 
     // Recolectar todas las posiciones
-    for (int i = first; i <= last; ++i) {
+    for (size_t i = first; i <= last; ++i) {
         posiciones.push_back(sa[i]);
     }
 
@@ -136,7 +139,7 @@ int main(int argc, char** argv) {
 
     // Leemos el archivo de entrada y guardamos el contenido en 'seq'
     int_vector<> seq;
-    int32_t n;
+    size_t n;
     {
         load_vector_from_file(seq, archivo_entrada, 1);
         n = seq.size();
