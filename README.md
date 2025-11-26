@@ -1,4 +1,4 @@
-# Estructuras de Datos para Indexación de Secuencias Biológicas
+# ALGORITMOS DE BUSQUEDA DE PATRONES CON MULTIPLES OCURRENCIAS EN TEXTOS
 
 Este proyecto implementa y compara tres estructuras de datos fundamentales para búsqueda de patrones en textos, con aplicaciones en bioinformática. Todas las implementaciones utilizan la biblioteca SDSL-lite (Succinct Data Structure Library).
 
