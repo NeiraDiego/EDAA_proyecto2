@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <sys/stat.h>
+#include <vector>
 
 using namespace std;
 
@@ -97,4 +98,38 @@ void escribir_csv_busqueda(const string& nombre_csv,
         << ocurrencias << "\n";
 
     out.close();
+}
+
+vector<string> leer_patrones_desde_archivo(const string& nombre_archivo) {
+    vector<string> patrones;
+
+    // Abrir archivo en modo binario para lectura exacta de bytes
+    ifstream archivo(nombre_archivo, ios::binary);
+
+    if (!archivo.is_open()) {
+        cerr << "Advertencia: no se pudo abrir " << nombre_archivo << " para leer patrones." << endl;
+        return patrones;
+    }
+
+    size_t largo_bytes;
+
+    // Leer patrones mientras haya datos
+    while (archivo >> largo_bytes) {
+        // Consumir el salto de línea después del número
+        archivo.ignore();
+
+        // Leer exactamente largo_bytes bytes
+        vector<char> buffer(largo_bytes);
+        if (archivo.read(buffer.data(), largo_bytes)) {
+            // Convertir a string y agregar al vector
+            string patron(buffer.begin(), buffer.end());
+            patrones.push_back(patron);
+        } else {
+            cerr << "Advertencia: se esperaban " << largo_bytes << " bytes pero el archivo terminó antes." << endl;
+            break;
+        }
+    }
+
+    archivo.close();
+    return patrones;
 }

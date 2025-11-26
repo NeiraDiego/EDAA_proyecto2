@@ -32,19 +32,89 @@ Todos los resultados se acumulan en los archivos CSV correspondientes para anál
 
 ## Formato de Archivos de Patrones
 
-Cada archivo de patrones debe contener un patrón por línea. Por ejemplo:
+Los archivos de patrones usan un formato binario especial:
 
 ```
-ATCG
-GCTA
-TACG
+<largo_patron_1>
+<bytes_del_patron_1>
+<largo_patron_2>
+<bytes_del_patron_2>
+...
+```
+
+Donde:
+- Cada patrón comienza con una línea que contiene el largo del patrón (número entero)
+- Le siguen exactamente ese número de bytes con el contenido del patrón
+- Los patrones pueden contener saltos de línea y caracteres especiales
+- Este formato permite búsqueda de patrones arbitrarios incluyendo secuencias binarias
+
+**Ejemplo visual:**
+```
+10
+ATCGATCGAT
+5
+GCTAT
+15
+TACCG
+AAGGCCTT
+```
+
+### Generación de Patrones
+
+Para generar archivos de patrones, usa el script `run_select_patrones.sh`:
+
+```bash
+chmod +x run_select_patrones.sh
+./run_select_patrones.sh
+```
+
+Este script usa el programa `select_patrones` para extraer patrones aleatorios de diferentes tamaños desde los archivos de entrada:
+
+```bash
+./select_patrones <archivo_fuente> <archivo_salida> <cantidad> <tamaño>
+```
+
+Por ejemplo:
+```bash
+# Extraer 100 patrones de tamaño 1000 desde dna y guardarlos en patrones-dna
+./select_patrones dna patrones-dna 100 1000
 ```
 
 **Nota:** El script buscará cada patrón 30 veces en la última construcción de cada archivo.
 
 ## Uso
 
-### Ejecución básica
+### Uso de los programas individuales
+
+Cada programa (FM, SA, SA-LCP) acepta dos modos de operación:
+
+**Modo interactivo (sin archivo de patrones):**
+```bash
+./FM <archivo_entrada>
+./SA <archivo_entrada>
+./SA-LCP <archivo_entrada>
+```
+En este modo, el programa solicita patrones por entrada estándar hasta que se ingresa "exit".
+
+**Modo batch (con archivo de patrones):**
+```bash
+./FM <archivo_entrada> <archivo_patrones>
+./SA <archivo_entrada> <archivo_patrones>
+./SA-LCP <archivo_entrada> <archivo_patrones>
+```
+En este modo, el programa lee todos los patrones desde el archivo y ejecuta las búsquedas automáticamente sin output verboso.
+
+**Ejemplo:**
+```bash
+# Construir índice y buscar patrones desde archivo
+./FM dna patrones-dna
+
+# Modo interactivo
+./FM dna
+# Luego ingresar patrones manualmente...
+```
+
+### Ejecución básica del script de experimentos
 
 ```bash
 ./experimentos.sh
@@ -187,6 +257,37 @@ EOF
 # 6. Verificar resultados
 cat exp-FM-construccion.csv
 cat exp-FM-busquedas.csv
+```
+
+## Herramientas Adicionales
+
+### lectura_patrones - Verificar archivos de patrones
+
+El programa `lectura_patrones` permite verificar el contenido de los archivos de patrones:
+
+```bash
+# Compilar (si es necesario)
+g++ -std=c++11 -O3 lectura_patrones.cpp -o lectura_patrones
+
+# Usar
+./lectura_patrones <archivo_patrones>
+```
+
+Este programa lee y muestra todos los patrones contenidos en un archivo, útil para:
+- Verificar que los patrones se generaron correctamente
+- Depurar problemas con el formato de archivos
+- Inspeccionar el contenido antes de ejecutar experimentos
+
+**Ejemplo de salida:**
+```
+--- Iniciando lectura de patrones ---
+Patron #1 (Largo: 10 bytes):
+CONTENIDO: [->managed_]
+----------------------------------------
+Patron #2 (Largo: 10 bytes):
+CONTENIDO: [hat you al]
+----------------------------------------
+Lectura finalizada. Total patrones leidos: 2
 ```
 
 ## Contacto

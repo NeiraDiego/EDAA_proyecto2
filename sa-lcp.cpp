@@ -115,7 +115,17 @@ size_t buscar_patron_sa_lcp(const int_vector<>& sa, const int_vector<>& seq,
 }
 
 int main(int argc, char** argv) {
-    string archivo_entrada = validar_archivo_entrada(argc, argv);
+    if (argc < 2 || argc > 3) {
+        cout << "Uso: " << argv[0] << " <archivo_entrada> [archivo_patrones]" << endl;
+        cout << "  archivo_entrada: archivo de texto para indexar" << endl;
+        cout << "  archivo_patrones: (opcional) archivo con patrones para buscar" << endl;
+        cout << "                    Si no se especifica, se usa modo interactivo" << endl;
+        return 1;
+    }
+
+    string archivo_entrada = argv[1];
+    string archivo_patrones = (argc == 3) ? argv[2] : "";
+    bool modo_archivo = !archivo_patrones.empty();
 
     // Leemos el archivo de entrada y guardamos el contenido en 'seq'
     int_vector<> seq;
@@ -161,21 +171,36 @@ int main(int argc, char** argv) {
                               tamano_total_mb);
 
     // =============================
-    //  BÚSQUEDAS INTERACTIVAS
-    //  se repiten hasta que el patrón sea "exit"
+    //  BÚSQUEDAS
     // =============================
 
-    while (true) {
-        string patron;
-        cout << "Ingrese un patrón a buscar (o 'exit' para terminar): ";
-        if (!getline(cin, patron)) {
-            // EOF o error en la entrada
-            break;
+    vector<string> patrones;
+
+    if (modo_archivo) {
+        // Modo archivo: leer patrones desde archivo
+        cout << "Leyendo patrones desde: " << archivo_patrones << endl;
+        patrones = leer_patrones_desde_archivo(archivo_patrones);
+        cout << "Patrones leídos: " << patrones.size() << endl;
+    } else {
+        // Modo interactivo: leer patrones desde entrada estándar
+        cout << "Modo interactivo: ingrese patrones (escriba 'exit' para terminar)" << endl;
+        while (true) {
+            string patron;
+            cout << "Ingrese un patrón a buscar (o 'exit' para terminar): ";
+            if (!getline(cin, patron)) {
+                break;
+            }
+            if (patron == "exit") {
+                cout << "Terminando las búsquedas." << endl;
+                break;
+            }
+            patrones.push_back(patron);
         }
-        if (patron == "exit") {
-            cout << "Terminando las búsquedas." << endl;
-            break;
-        }
+    }
+
+    // Ejecutar búsquedas para todos los patrones
+    for (size_t i = 0; i < patrones.size(); ++i) {
+        const string& patron = patrones[i];
 
         // Búsqueda
         timer.reiniciar();
@@ -183,17 +208,20 @@ int main(int argc, char** argv) {
         size_t occs = buscar_patron_sa_lcp(sa, seq, lcp, patron, posiciones);
         long long t_busqueda = timer.transcurrido_ns();
 
-        cout << "# de ocurrencias: " << occs << endl;
-        cout << "Tiempo de búsqueda: " << t_busqueda << " ns" << endl;
+        if (!modo_archivo) {
+            cout << "Patrón #" << (i + 1) << ": " << patron << endl;
+            cout << "# de ocurrencias: " << occs << endl;
+            cout << "Tiempo de búsqueda: " << t_busqueda << " ns" << endl;
 
-        // Si hay ocurrencias, las mostramos
-        if (occs > 0) {
-            cout << "Las ocurrencias comienzan en las siguientes posiciones: " << endl;
-            for (size_t i = 0; i < posiciones.size(); ++i) {
-                cout << posiciones[i];
-                if (i + 1 < posiciones.size()) cout << ",";
+            // Si hay ocurrencias, las mostramos
+            if (occs > 0) {
+                cout << "Las ocurrencias comienzan en las siguientes posiciones: " << endl;
+                for (size_t j = 0; j < posiciones.size(); ++j) {
+                    cout << posiciones[j];
+                    if (j + 1 < posiciones.size()) cout << ",";
+                }
+                cout << "\n";
             }
-            cout << "\n";
         }
 
         // Registrar búsqueda en CSV
@@ -203,6 +231,10 @@ int main(int argc, char** argv) {
                              patron.size(),
                              t_busqueda,
                              occs);
+    }
+
+    if (modo_archivo) {
+        cout << "Búsquedas completadas: " << patrones.size() << " patrones procesados" << endl;
     }
 
     return 0;

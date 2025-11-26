@@ -127,18 +127,108 @@ make SA-LCP       # Solo SA + LCP
 
 ### Uso
 
+Todos los programas soportan dos modos de operación:
+
+#### Modo Interactivo
 ```bash
-# FM-Index
 ./FM <archivo_entrada>
-
-# Suffix Array
 ./SA <archivo_entrada>
-
-# Suffix Array + LCP
 ./SA-LCP <archivo_entrada>
 ```
+En este modo, el programa solicita patrones por entrada estándar. Ingrese un patrón por línea y escriba `exit` para terminar.
 
-Cada programa genera archivos CSV con métricas de rendimiento para análisis experimental.
+#### Modo Batch (Archivos de Patrones)
+```bash
+./FM <archivo_entrada> <archivo_patrones>
+./SA <archivo_entrada> <archivo_patrones>
+./SA-LCP <archivo_entrada> <archivo_patrones>
+```
+En este modo, el programa lee todos los patrones desde un archivo y ejecuta las búsquedas automáticamente.
+
+**Formato de archivo de patrones:**
+```
+<largo_patron_1>
+<bytes_del_patron_1>
+<largo_patron_2>
+<bytes_del_patron_2>
+...
+```
+
+Cada patrón está precedido por una línea con su longitud en bytes, seguida de exactamente esa cantidad de bytes de contenido.
+
+**Ejemplo:**
+```bash
+# Modo interactivo
+./FM dna
+# (ingresar patrones manualmente...)
+
+# Modo batch
+./FM dna patrones-dna
+./SA proteins patrones-proteins
+./SA-LCP genomic.fna patrones-genomic
+```
+
+### Archivos CSV Generados
+
+Cada programa genera archivos CSV con métricas de rendimiento:
+
+**Construcción:**
+- `exp-FM-construccion.csv` - Tiempo de construcción, tamaño original, tamaño del índice (en MB)
+- `exp-SA-construccion.csv`
+- `exp-SA-LCP-construccion.csv`
+
+**Búsquedas:**
+- `exp-FM-busquedas.csv` - Archivo, patrón, tamaño, **tiempo en nanosegundos (ns)**, ocurrencias
+- `exp-SA-busquedas.csv`
+- `exp-SA-LCP-busquedas.csv`
+
+**Nota:** Los tiempos de búsqueda se miden en **nanosegundos** para capturar con precisión operaciones muy rápidas.
+
+### Herramientas Auxiliares
+
+#### Generación de Patrones
+
+Para generar archivos de patrones automáticamente:
+
+```bash
+# Compilar select_patrones (si es necesario)
+make select_patrones
+
+# Extraer patrones de un archivo
+./select_patrones <archivo_fuente> <archivo_salida> <cantidad> <tamaño>
+
+# Ejemplo: extraer 100 patrones de tamaño 1000 desde dna
+./select_patrones dna patrones-dna 100 1000
+
+# Generar múltiples archivos de patrones automáticamente
+chmod +x run_select_patrones.sh
+./run_select_patrones.sh
+```
+
+El script `run_select_patrones.sh` genera patrones de tamaños variados (10, 100, 1000, 10000, 100000, 1000000 bytes) para todos los archivos de entrada.
+
+#### Verificación de Patrones
+
+Para verificar el contenido de un archivo de patrones:
+
+```bash
+# Compilar lectura_patrones
+g++ -std=c++11 -O3 lectura_patrones.cpp -o lectura_patrones
+
+# Verificar contenido
+./lectura_patrones patrones-dna
+```
+
+Este programa muestra todos los patrones contenidos en el archivo, útil para depuración y verificación.
+
+### Experimentos Automatizados
+
+Para ejecutar experimentos sistemáticos, consulta `EXPERIMENTOS-README.md`:
+
+```bash
+# Ejecutar suite completa de experimentos
+./experimentos.sh
+```
 
 ---
 

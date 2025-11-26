@@ -14,7 +14,7 @@ void mostrarUso(const char* nombrePrograma) {
 }
 
 std::string leerArchivo(const std::string& nombreArchivo) {
-  std::string file_path = "/home/dataset/"+nombreArchivo;
+  std::string file_path = "./"+nombreArchivo;
   std::ifstream archivo(file_path, std::ios::binary);
   if (!archivo.is_open()) {
     std::cerr << "Error: No se pudo abrir el archivo de entrada '" << file_path << "'" << std::endl;

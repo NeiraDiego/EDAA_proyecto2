@@ -2,6 +2,7 @@
 #define UTILS_HPP
 
 #include <string>
+#include <vector>
 #include <chrono>
 
 // Clase para medición de tiempo de ejecución
@@ -46,5 +47,12 @@ void escribir_csv_busqueda(const std::string& nombre_csv,
                            size_t tamano_patron,
                            long long tiempo_busqueda_ns,
                            size_t ocurrencias);
+
+// Lee patrones desde un archivo en formato especial:
+// - Una línea con el largo del patrón (número entero)
+// - Exactamente ese número de bytes con el contenido del patrón
+// - Se repite para cada patrón
+// Retorna un vector con todos los patrones leídos
+std::vector<std::string> leer_patrones_desde_archivo(const std::string& nombre_archivo);
 
 #endif // UTILS_HPP

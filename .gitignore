@@ -4,6 +4,7 @@ SA
 SA-LCP
 utils.o
 nohup.out
+select_patrones
 
 
 sources
@@ -13,5 +14,5 @@ proteins
 
 *.sdsl
 bkp*
-
+patrones*
 
