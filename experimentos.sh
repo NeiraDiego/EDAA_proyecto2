@@ -22,7 +22,7 @@ PATRONES=(
 PROGRAMAS=("./FM" "./SA" "./SA-LCP")
 
 # Número de veces que se construye la estructura por programa/archivo
-NUM_CONSTRUCCIONES=5
+NUM_CONSTRUCCIONES=1
 
 # Número de veces que se busca cada patrón (usando parámetro de repeticiones)
 # En la última construcción, se ejecuta: ./PROGRAMA archivo patrones NUM_BUSQUEDAS_POR_PATRON
