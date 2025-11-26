@@ -5,11 +5,13 @@ SA-LCP
 utils.o
 nohup.out
 
+
 sources
 genomic.fna
 dna
 proteins
 
 *.sdsl
+bkp*
 
 
