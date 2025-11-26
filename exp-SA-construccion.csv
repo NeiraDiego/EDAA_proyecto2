@@ -1,3 +1,7 @@
 archivo_original,tamano_original_mb,tiempo_construccion_ms,tamano_estructura_mb
-dna,385.216,32455,1396.41
-proteins,1129.2,111577,4375.65
+sources,201.098,11437,703.843
+dna,385.216,32106,1396.41
+dna,385.216,32214,1396.41
+sources,201.098,11489,703.843
+dna,385.216,32530,1396.41
+proteins,1129.2,114276,4375.65

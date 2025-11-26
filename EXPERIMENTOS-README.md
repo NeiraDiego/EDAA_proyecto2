@@ -56,7 +56,7 @@ TACG
 2. Pregunta si deseas eliminar los CSV existentes (para empezar desde cero)
 3. Para cada archivo de entrada:
    - Ejecuta cada programa (FM, SA, SA-LCP):
-     - 29 veces solo construcción (sin búsquedas)
+     - 4 veces solo construcción (sin búsquedas)
      - 1 vez construcción + 30 búsquedas por patrón
 4. Muestra el tiempo total de ejecución
 

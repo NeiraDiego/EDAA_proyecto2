@@ -1,3 +1,1 @@
-for (i = 0; i < 256; i++)
-return IRQ_HANDLED;
-static const SiS_LVDSDesStruct  SiS310_PanelType06_2[]=
+SiS_LVDSDesStruct  SiS310_PanelType06_2[]=

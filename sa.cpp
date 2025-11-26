@@ -139,7 +139,7 @@ int main(int argc, char** argv) {
     while (true) {
         string patron;
         cout << "Ingrese un patrón a buscar (o 'exit' para terminar): ";
-        if (!(cin >> patron)) {
+        if (!getline(cin, patron)) {
             // EOF o error en la entrada
             break;
         }
@@ -152,10 +152,10 @@ int main(int argc, char** argv) {
         timer.reiniciar();
         vector<size_t> posiciones;
         size_t occs = buscar_patron_sa(sa, seq, patron, posiciones);
-        long t_busqueda = timer.transcurrido_ms();
+        long long t_busqueda = timer.transcurrido_ns();
 
         cout << "# de ocurrencias: " << occs << endl;
-        cout << "Tiempo de búsqueda: " << t_busqueda << " ms" << endl;
+        cout << "Tiempo de búsqueda: " << t_busqueda << " ns" << endl;
 
         // Si hay ocurrencias, las mostramos
         if (occs > 0) {

@@ -22,7 +22,7 @@ PATRONES=(
 PROGRAMAS=("./FM" "./SA" "./SA-LCP")
 
 # Número de veces que se construye la estructura
-NUM_CONSTRUCCIONES=1
+NUM_CONSTRUCCIONES=5
 
 # Número de veces que se busca cada patrón
 NUM_BUSQUEDAS_POR_PATRON=30
@@ -134,13 +134,13 @@ echo ""
 verificar_archivos
 
 # Preguntar si desea limpiar los CSV existentes
-read -p "¿Desea eliminar los archivos CSV existentes para empezar desde cero? (s/n): " -n 1 -r
-echo ""
-if [[ $REPLY =~ ^[Ss]$ ]]; then
-    echo "Eliminando archivos CSV existentes..."
-    rm -f exp-*.csv
-    echo "Archivos CSV eliminados."
-fi
+#read -p "¿Desea eliminar los archivos CSV existentes para empezar desde cero? (s/n): " -n 1 -r
+#echo ""
+#if [[ $REPLY =~ ^[Ss]$ ]]; then
+#    echo "Eliminando archivos CSV existentes..."
+#    rm -f exp-*.csv
+#    echo "Archivos CSV eliminados."
+#fi
 
 echo ""
 echo "Iniciando experimentos..."

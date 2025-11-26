@@ -18,6 +18,11 @@ long Temporizador::transcurrido_ms() const {
     return chrono::duration_cast<chrono::milliseconds>(fin - inicio).count();
 }
 
+long long Temporizador::transcurrido_ns() const {
+    auto fin = chrono::high_resolution_clock::now();
+    return chrono::duration_cast<chrono::nanoseconds>(fin - inicio).count();
+}
+
 void Temporizador::reiniciar() {
     inicio = chrono::high_resolution_clock::now();
 }
@@ -72,7 +77,7 @@ void escribir_csv_busqueda(const string& nombre_csv,
                            const string& archivo_entrada,
                            const string& patron,
                            size_t tamano_patron,
-                           long tiempo_busqueda_ms,
+                           long long tiempo_busqueda_ns,
                            size_t ocurrencias) {
     ofstream out(nombre_csv, ios::app);
     if (!out) {
@@ -82,13 +87,13 @@ void escribir_csv_busqueda(const string& nombre_csv,
 
     // Escribir encabezado si el archivo está vacío
     if (out.tellp() == 0) {
-        out << "archivo_original,patron,tamano_patron,tiempo_busqueda_ms,ocurrencias\n";
+        out << "archivo_original,patron,tamano_patron,tiempo_busqueda_ns,ocurrencias\n";
     }
 
     out << archivo_entrada << ","
         << patron << ","
         << tamano_patron << ","
-        << tiempo_busqueda_ms << ","
+        << tiempo_busqueda_ns << ","
         << ocurrencias << "\n";
 
     out.close();

@@ -3,6 +3,7 @@ FM
 SA
 SA-LCP
 utils.o
+nohup.out
 
 sources
 genomic.fna

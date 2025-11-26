@@ -16,6 +16,9 @@ public:
     // Retorna el tiempo transcurrido en milisegundos
     long transcurrido_ms() const;
 
+    // Retorna el tiempo transcurrido en nanosegundos
+    long long transcurrido_ns() const;
+
     // Reinicia el temporizador
     void reiniciar();
 };
@@ -36,12 +39,12 @@ void escribir_csv_construccion(const std::string& nombre_csv,
                                 double tamano_estructura_mb);
 
 // Escribe una línea en el CSV de búsquedas
-// Formato: archivo_original,patron,tamano_patron,tiempo_busqueda_ms,ocurrencias
+// Formato: archivo_original,patron,tamano_patron,tiempo_busqueda_ns,ocurrencias
 void escribir_csv_busqueda(const std::string& nombre_csv,
                            const std::string& archivo_entrada,
                            const std::string& patron,
                            size_t tamano_patron,
-                           long tiempo_busqueda_ms,
+                           long long tiempo_busqueda_ns,
                            size_t ocurrencias);
 
 #endif // UTILS_HPP
