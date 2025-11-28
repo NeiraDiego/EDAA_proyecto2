@@ -146,7 +146,7 @@ int main(int argc, char** argv) {
 
         seq.resize(n+1);
         n = seq.size();
-        seq[n-1] = 0; // Representa el final de texto. Suele representarse por el símbolo $
+        seq[n-1] = 0; // Representa el final de texto
     }
 
     cout << "Construyendo el Suffix array ..." << endl;
