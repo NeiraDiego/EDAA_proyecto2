@@ -147,9 +147,30 @@ Este programa muestra todos los patrones contenidos en el archivo, útil para de
 
 ### Experimentos Automatizados
 
-Para ejecutar experimentos se ejecuta el script `experimentos.sh`, editando según los experimentos que se deseen correr:
+El script `experimentos.sh` automatiza la ejecución de experimentos sobre múltiples archivos de entrada, ejecutando:
 
-```bash
-# Ejecutar suite completa de experimentos
-./experimentos.sh
-```
+1. **30 construcciones** de cada estructura (FM-Index, SA, SA-LCP) para cada archivo
+2. En la **última construcción** de cada archivo: **30 búsquedas** de cada patrón definido
+
+Todos los resultados se acumulan en los archivos CSV correspondientes para análisis posterior.
+
+## Requisitos
+
+1. **Compilar los programas:**
+   ```bash
+   make all
+   ```
+
+2. **Preparar archivos de entrada:**
+   - `sources` - Archivo de texto fuente
+   - `dna` - Secuencia de ADN
+   - `proteins` - Secuencia de proteínas
+   - `genomic.fna` - Archivo genómico humano
+
+3. **Preparar archivos de patrones:**
+   - `patrones-sources` - Patrones para buscar en `sources`
+   - `patrones-dna` - Patrones para buscar en `dna`
+   - `patrones-proteins` - Patrones para buscar en `proteins`
+   - `patrones-genomic` - Patrones para buscar en `genomic.fna`
+
+
